@@ -51,26 +51,21 @@ public class Input {
 
         setNodeClickEvents();
         setNodeKeyEvents();
-        node.setOnScroll(event -> scroll += event.getDeltaY());
+        node.setOnScroll(event -> scroll = (int) event.getDeltaY());
     }
 
     private void setNodeKeyEvents() {
-        node.setOnKeyPressed(event -> {
-            mapKeysState.replace(event.getCode(), Boolean.TRUE);
-        });
-
-        node.setOnKeyReleased(event -> {
-            mapKeysState.replace(event.getCode(), Boolean.FALSE);
-        });
+        node.setOnKeyPressed(event -> mapKeysState.replace(event.getCode(), Boolean.TRUE));
+        node.setOnKeyReleased(event -> mapKeysState.replace(event.getCode(), Boolean.FALSE));
     }
 
     private void setNodeClickEvents() {
+        node.setOnMousePressed(event -> mapButtons.replace(event.getButton(), Boolean.TRUE));
+        node.setOnMouseReleased(event -> mapButtons.replace(event.getButton(), Boolean.FALSE));
         node.setOnMouseMoved(event -> {
             mouseX = event.getX();
             mouseY = event.getY();
         });
-        node.setOnMousePressed(event -> mapButtons.replace(event.getButton(), Boolean.TRUE));
-        node.setOnMouseReleased(event -> mapButtons.replace(event.getButton(), Boolean.FALSE));
     }
 
     public void update() {
@@ -82,7 +77,7 @@ public class Input {
     }
 
     public boolean isKey(KeyCode keyCode) {
-        return mapKeysState.get(keyCode);//return keysState[keyCode];
+        return mapKeysState.get(keyCode);
     }
 
     public boolean isKeyUp(KeyCode keyCode) {

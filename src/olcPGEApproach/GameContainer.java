@@ -49,6 +49,7 @@ public class GameContainer {
     private void update(float elapsedTime) {
         input.update();
         game.update(this, elapsedTime);
+        renderer.process();
     }
 
     private void render() {

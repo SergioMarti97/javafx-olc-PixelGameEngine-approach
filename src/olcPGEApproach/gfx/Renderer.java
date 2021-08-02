@@ -2,10 +2,13 @@ package olcPGEApproach.gfx;
 
 import olcPGEApproach.gfx.font.Font;
 import olcPGEApproach.gfx.images.Image;
+import olcPGEApproach.gfx.images.ImageRequest;
 import olcPGEApproach.gfx.images.ImageTile;
 import olcPGEApproach.vectors.points2d.Vec2df;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 
 /**
  * This class contains some
@@ -23,23 +26,57 @@ public class Renderer {
     /**
      * The font for the text
      */
-    //protected Font font = Font.STANDARD;
     protected Font font;
+
+    /**
+     * This is an ArrayList for the request of the images
+     */
+    protected ArrayList<ImageRequest> imageRequests;
 
     /**
      * Array of pixels
      */
-    private final int[] p;
+    protected final int[] p;
 
     /**
      * Canvas width
      */
-    private final int pW;
+    protected final int pW;
 
     /**
      * Canvas height
      */
-    private final int pH;
+    protected final int pH;
+
+    /**
+     * The Z-buffer, needed for Alpha blending
+     */
+    protected int[] zb;
+
+    /**
+     * The depth in z axis of screen
+     */
+    protected int zDepth = 0;
+
+    /**
+     *
+     */
+    protected int[] lm;
+
+    /**
+     *
+     */
+    protected int[] lb;
+
+    /**
+     * Processing flag for the image processing
+     */
+    protected boolean processing = false;
+
+    /**
+     * The background color
+     */
+    protected int ambientColor = 0xffffffff;
 
     /**
      * Constructor
@@ -52,11 +89,95 @@ public class Renderer {
         this.pW = pW;
         this.pH = pH;
 
+        zb = new int[p.length];
+        lm = new int[p.length];
+        lb = new int[p.length];
+
+        imageRequests = new ArrayList<>();
+
         font = new Font("/consolas24.png");
     }
 
+    /**
+     * This method clears all the screen with
+     * the color passed as parameter
+     *
+     * Before it works well only with the method
+     * "Arrays.fill(p, color)"
+     *
+     * @param color the color for clear all the screen
+     */
+    public void clear(int color) {
+        Arrays.fill(p, color);
+        Arrays.fill(zb, 0);
+        Arrays.fill(lm, ambientColor);
+        Arrays.fill(lb, 0);
+    }
+
+    /**
+     * This method clears all the screen with
+     * black
+     */
+    public void clear() {
+        clear(0xff000000);
+    }
+
+    /**
+     * This method is needed for processing the images
+     */
+    public void process() {
+        processing = true;
+
+        if ( imageRequests.size() > 0 ) {
+            imageRequests.sort(Comparator.comparingInt(ImageRequest::getzDepth));
+
+            for (ImageRequest ir : imageRequests) {
+                setZDepth(ir.getzDepth());
+                drawImage(ir.getImage(), ir.getOffX(), ir.getOffY());
+            }
+
+            for (int i = 0; i < p.length; i++) {
+                float r = ((lm[i] >> 16) & 0xff) / 255.0f;
+                float g = ((lm[i] >> 8) & 0xff) / 255.0f;
+                float b = (lm[i] & 0xff) / 255.0f;
+                p[i] = ((int) (((p[i] >> 16) & 0xff) * r) << 16 | (int) (((p[i] >> 8) & 0xff) * g) << 8 | (int) ((p[i] & 0xff) * b));
+            }
+        }
+
+        imageRequests.clear();
+        processing = false;
+    }
+
+    /**
+     * This method sets only one pixel of the array to
+     * the color specify in the parameter value
+     *
+     * Original way: p[y * pW + x] = color;
+     *
+     * @param x the x coordinate in screen
+     * @param y the y coordinate in screen
+     * @param color the color to set the pixel
+     */
     public void setPixel(int x, int y, int color) {
-        p[y * pW + x] = color;
+        int alpha = ((color >> 24) & 0xff);
+        if ( (x < 0 || x >= pW || y < 0 || y >= pH) || alpha == 0 ) { // value == 0xffff00ff
+            return;
+        }
+        int index = x + y * pW;
+        if ( zb[index] > zDepth ) {
+            return;
+        }
+        zb[index] = zDepth;
+        if ( alpha == 255 ) {
+            p[index] = color;
+        } else {
+            int pixelColor = p[index];
+            int newRed = ((pixelColor >> 16) & 0xff) - (int)((((pixelColor >> 16) & 0xff) - ((color >> 16) & 0xff)) * (alpha / 255.0f));
+            int newGreen = ((pixelColor >> 8) & 0xff) - (int)((((pixelColor >> 8) & 0xff) - ((color >> 8) & 0xff)) * (alpha / 255.0f));
+            int newBlue = (pixelColor & 0xff) - (int)(((pixelColor & 0xff) - (color & 0xff)) * (alpha / 255.0f));
+            int pixel = (255 << 24 | newRed << 16 | newGreen << 8 | newBlue);
+            p[index] = pixel;
+        }
     }
 
     public void drawLine(int x1, int y1, int x2, int y2, int color) {
@@ -106,8 +227,7 @@ public class Renderer {
 
             setPixel(x, y, color);
 
-            for (; x < xe; )
-            {
+            while (x < xe) {
                 x = x + 1;
                 if (px<0)
                     px = px + 2 * dy1;
@@ -132,8 +252,7 @@ public class Renderer {
 
             setPixel(x, y, color);
 
-            for (; y<ye; )
-            {
+            while (y<ye) {
                 y = y + 1;
                 if (py <= 0)
                     py = py + 2 * dx1;
@@ -432,6 +551,11 @@ public class Renderer {
             return;
         }
 
+        if ( image.isAlpha() && !processing) {
+            imageRequests.add(new ImageRequest(image, zDepth, offX, offY));
+            return;
+        }
+
         // Don't render code
         if ( offX < -pW ) {
             return;
@@ -467,7 +591,8 @@ public class Renderer {
 
         for (int y = newY; y < newHeight; y++) {
             for (int x = newX; x < newWidth; x++) {
-                p[(x + offX) + pW * (y + offY)] = image.getPixel(x, y);
+                //p[(x + offX) + pW * (y + offY)] = image.getPixel(x, y);
+                setPixel(x + offX, y + offY, image.getPixel(x, y));
             }
         }
     }
@@ -477,10 +602,10 @@ public class Renderer {
             return;
         }
 
-        /*if ( image.isAlpha() && !processing) {
+        if ( image.isAlpha() && !processing) {
             imageRequests.add(new ImageRequest(image, zDepth, offX, offY));
             return;
-        }*/
+        }
 
         // Don't render code
         if ( offX < -pW ) {
@@ -532,10 +657,10 @@ public class Renderer {
             return;
         }
 
-        /*if ( image.isAlpha() && !processing) {
+        if ( image.isAlpha() && !processing) {
             imageRequests.add(new ImageRequest(image.getTileImage(tileX, tileY), zDepth, offX, offY));
             return;
-        }*/
+        }
 
         // Don't render code
         if ( offX < -image.getTileW() ) {
@@ -624,22 +749,36 @@ public class Renderer {
         }
     }
 
+    /**
+     * This method draws the text passed by parameter
+     *
+     * Original piece of code:
+     * for ( int y = 0; y < font.getFontImage().getH(); y++ ) {
+     *   for ( int x = 0; x < font.getWidths()[unicode]; x++ ) {
+     *     if ( font.getFontImage().getP()[(x + font.getOffsets()[unicode]) + y * font.getFontImage().getW()] == 0xffffffff ) {
+     *       setPixel(x + offset + offX, y + offY, color);
+     *     }
+     *   }
+     * }
+     *
+     * @param text the text to display
+     * @param offX the offset on X axis of the text
+     * @param offY the offset on Y axis of the text
+     * @param color the color of of the text
+     * @param font the font to display the text
+     */
     public void drawText(String text, int offX, int offY, int color, Font font) {
         int offset = 0;
         for ( int i = 0; i < text.length(); i++ ) {
             int unicode = text.codePointAt(i);
-            /*for ( int y = 0; y < font.getFontImage().getH(); y++ ) {
-                for ( int x = 0; x < font.getWidths()[unicode]; x++ ) {
-                    if ( font.getFontImage().getP()[(x + font.getOffsets()[unicode]) + y * font.getFontImage().getW()] == 0xffffffff ) {
-                        setPixel(x + offset + offX, y + offY, color);
-                    }
-                }
-            }*/
             drawCharacter(font.getCharacterImage(unicode), offset + offX, offY, color);
             offset += font.getWidths()[unicode];
         }
     }
 
+    /**
+     * This method draws the text, with the default font
+     */
     public void drawText(String text, int offX, int offY, int color) {
         drawText(text, offX, offY, color, font);
     }
@@ -656,6 +795,22 @@ public class Renderer {
 
     public int getH() {
         return pH;
+    }
+
+    public int getZDepth() {
+        return zDepth;
+    }
+
+    public int getAmbientColor() {
+        return ambientColor;
+    }
+
+    private void setZDepth(int zDepth) {
+        this.zDepth = zDepth;
+    }
+
+    public void setAmbientColor(int ambientColor) {
+        this.ambientColor = ambientColor;
     }
 
 }

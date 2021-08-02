@@ -24,6 +24,11 @@ public class Image {
     protected int[] p;
 
     /**
+     * If the image has alpha
+     */
+    protected boolean alpha = false;
+
+    /**
      * The null constructor
      */
     public Image() {
@@ -65,7 +70,7 @@ public class Image {
     public Image(String path) {
         javafx.scene.image.Image img = new javafx.scene.image.Image(path);
         w = (int)img.getWidth();
-        h = (int)img.getWidth();
+        h = (int)img.getHeight();
         p = getPixels(img, 0, 0, w, h);
     }
 
@@ -146,6 +151,10 @@ public class Image {
         return p;
     }
 
+    public boolean isAlpha() {
+        return alpha;
+    }
+
     public void setW(int w) {
         this.w = w;
     }
@@ -156,6 +165,10 @@ public class Image {
 
     public void setP(int[] p) {
         this.p = p;
+    }
+
+    public void setAlpha(boolean alpha) {
+        this.alpha = alpha;
     }
 
 }
