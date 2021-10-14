@@ -48,8 +48,8 @@ public class CustomTimer extends AnimationTimer {
 
         if ( accumulatedTime >= 1000000000L ) {
             accumulatedTime -= 1000000000L;
-            textFps.set(String.format("FPS: %,d", frames));
-            System.out.println("FPS: " + frames);
+            textFps.set(String.format("FPS: %d", frames));
+            //System.out.println("FPS: " + frames);
             frames = 0;
         }
         renderer.render();

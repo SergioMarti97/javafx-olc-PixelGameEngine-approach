@@ -3,6 +3,7 @@ package olcPGEApproach;
 import javafx.scene.Node;
 import javafx.scene.image.PixelFormat;
 import javafx.scene.image.WritableImage;
+import javafx.stage.Stage;
 import olcPGEApproach.gfx.Renderer;
 
 /**
@@ -31,6 +32,8 @@ public class GameContainer {
 
     private Node node;
 
+    private Stage stage;
+
     /**
      * Constructor
      */
@@ -47,8 +50,8 @@ public class GameContainer {
     }
 
     private void update(float elapsedTime) {
-        input.update();
         game.update(this, elapsedTime);
+        input.update();
         renderer.process();
     }
 
@@ -84,4 +87,12 @@ public class GameContainer {
         return node;
     }
 
+    public Stage getStage() {
+        return stage;
+    }
+
+    public void setStage(Stage stage) {
+        this.stage = stage;
+    }
+    
 }
