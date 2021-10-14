@@ -9,6 +9,7 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.layout.StackPane;
 import javafx.util.Duration;
+import javafx.util.Pair;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -23,7 +24,7 @@ public class ScreensManager extends StackPane {
      * String = id of that particular screen
      * Node = represents the root of the scene graph for that particular screen
      */
-    private final HashMap<String, Node> screens = new HashMap<>();
+    private final HashMap<String, Pair<Node, ScreenController>> screens = new HashMap<>();
 
     /**
      * Constructor
@@ -35,17 +36,17 @@ public class ScreensManager extends StackPane {
     /**
      * Adds a screen to the collection
      * @param name the id of the new screen
-     * @param screen the root of the scene graph for the new screen
+     * @param pairNodeAndController the root of the scene graph for the new screen and its controller
      */
-    public void addScreen(String name, Node screen) {
-        screens.put(name, screen);
+    public void addScreen(String name, Pair<Node, ScreenController> pairNodeAndController) {
+        screens.put(name, pairNodeAndController);
     }
 
     /**
-     * Returns the node with the appropriate name
+     * Returns a pair with the node and the screen controller with the appropriate name
      * @param name the id of a present screen
      */
-    public Node getScreen(String name) {
+    public Pair<Node, ScreenController> getScreen(String name) {
         return screens.get(name);
     }
 
@@ -60,9 +61,9 @@ public class ScreensManager extends StackPane {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(resource));
             Parent loadScreen = loader.load();
-            ControlledScreen screenController = loader.getController();
+            ScreenController screenController = loader.getController();
             screenController.setScreenParent(this);
-            addScreen(name, loadScreen);
+            addScreen(name, new Pair<>(loadScreen, screenController));
             return true;
         } catch (IOException e) {
             System.out.println(e.getMessage());
@@ -87,7 +88,7 @@ public class ScreensManager extends StackPane {
                         new KeyFrame(Duration.ZERO, new KeyValue(opacity, 1.0)),
                         new KeyFrame(new Duration(1000), event -> {
                             getChildren().remove(0); // Remove the displayed screen
-                            getChildren().add(0, screens.get(name)); // add the screen
+                            getChildren().add(0, screens.get(name).getKey()); // add the screen
                             Timeline fadeIn = new Timeline(
                                     new KeyFrame(Duration.ZERO, new KeyValue(opacity, 0.0)),
                                     new KeyFrame(new Duration(800), new KeyValue(opacity, 1.0)));
@@ -96,7 +97,7 @@ public class ScreensManager extends StackPane {
                 fade.play();
             } else {
                 setOpacity(0.0);
-                getChildren().add(screens.get(name));
+                getChildren().add(screens.get(name).getKey());
                 Timeline fadeIn = new Timeline(
                         new KeyFrame(Duration.ZERO, new KeyValue(opacity, 0.0)),
                         new KeyFrame(new Duration(2500), new KeyValue(opacity, 1.0)));
@@ -124,7 +125,7 @@ public class ScreensManager extends StackPane {
 
     // Getters and setters
 
-    public HashMap<String, Node> getScreens() {
+    public HashMap<String, Pair<Node, ScreenController>> getScreens() {
         return screens;
     }
 
