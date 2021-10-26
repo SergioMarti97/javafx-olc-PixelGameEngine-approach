@@ -20,6 +20,44 @@ import java.util.Comparator;
  * Are the methods are copied
  * from the olcPixelGameEngine.h
  * javidx9
+ *
+ * DRAWING ROUTINES:
+ *  - draw
+ *  - draw line
+ *  - draw circle
+ *  - draw fill circle
+ *  - draw rect
+ *  - draw fill rect
+ *  - draw triangle
+ *  - draw fill triangle
+ *  - draw sprite
+ *  - draw partial sprite
+ *  - draw string
+ *  - get text size
+ *  - draw string properly
+ *  - get text size properly
+ *
+ *  - clear
+ *  - clear buffer
+ *  - get font sprite
+ *
+ *  Decals
+ *  - set decal mode
+ *  - draw decal
+ *  - draw partial decal
+ *  - draw explicit decal
+ *  - draw warped decal
+ *  - draw partial warped decal
+ *  - draw rotate decal
+ *  - draw partial rotate decal
+ *  - draw string decal
+ *  - draw string properly decal
+ *  - fill rect decal
+ *  - gradient fill rect decal
+ *  - draw polygon decal
+ *  - draw line decal
+ *  - draw rotate string decal
+ *  - draw rotate string properly decal
  */
 public class Renderer {
 
@@ -47,6 +85,16 @@ public class Renderer {
      * Canvas height
      */
     protected final int pH;
+
+    /**
+     * Canvas inverse width (1.0F / pW)
+     */
+    protected final float invW;
+
+    /**
+     * Canvas inverse height (1.0F / pH)
+     */
+    protected final float invH;
 
     /**
      * The Z-buffer, needed for Alpha blending
@@ -88,6 +136,9 @@ public class Renderer {
         this.p = p;
         this.pW = pW;
         this.pH = pH;
+
+        invW = 1.0f / pW;
+        invH = 1.0f / pH;
 
         zb = new int[p.length];
         lm = new int[p.length];
@@ -782,6 +833,391 @@ public class Renderer {
     public void drawText(String text, int offX, int offY, int color) {
         drawText(text, offX, offY, color, font);
     }
+
+    public void drawWarpedDecal(Image img, Vec2df[] pos, boolean drawTriangles) {
+        float[] w = new float[4];
+        Arrays.fill(w, 1.0f);
+
+        Vec2df[] uv = new Vec2df[] {
+                new Vec2df(0.0f, 0.0f),
+                new Vec2df(0.0f, 1.0f),
+                new Vec2df(1.0f, 1.0f),
+                new Vec2df(1.0f, 0.0f)
+        };
+
+        Vec2df[] posDi = new Vec2df[] {
+                new Vec2df(),
+                new Vec2df(),
+                new Vec2df(),
+                new Vec2df()
+        };
+
+        Vec2df center = new Vec2df();
+
+        float rd = (pos[2].getX() - pos[0].getX()) * (pos[3].getY() - pos[1].getY()) - (pos[3].getX() - pos[1].getX()) * (pos[2].getY() - pos[0].getY());
+
+        if (rd != 0) {
+            rd = 1.0f / rd;
+
+            float rn = ((pos[3].getX() - pos[1].getX()) * (pos[0].getY() - pos[1].getY()) - (pos[3].getY() - pos[1].getY()) * (pos[0].getX() - pos[1].getX())) * rd;
+            float sn = ((pos[2].getX() - pos[0].getX()) * (pos[0].getY() - pos[1].getY()) - (pos[2].getY() - pos[0].getY()) * (pos[0].getX() - pos[1].getX())) * rd;
+
+            if ( !(rn < 0.f || rn > 1.f || sn < 0.f || sn > 1.f) ) {
+                //center = pos[0] + rn * (pos[2] - pos[0]);
+                center.setX(pos[0].getX() + rn * (pos[2].getX() - pos[0].getX()));
+                center.setY(pos[0].getY() + rn * (pos[2].getY() - pos[0].getY()));
+            }
+
+            float[] d = new float[4];
+            for (int i = 0; i < 4; i++)	{
+                //d[i] = (pos[i] - center).mag();
+                // Para cada valor de d, se calcula la magnitud del vector resultante de pos[i] - centro
+                float vecX = pos[i].getX() - center.getX();
+                float vecY = pos[i].getY() - center.getY();
+                d[i] = (float)Math.sqrt(vecX * vecX + vecY * vecY);
+            }
+
+            for (int i = 0; i < 4; i++) {
+                //float up = d[i] + d[(i + 2) & 3];
+                //float down = d[(i + 2) & 3];
+                //down = (down == 0)? 1.0f : down;
+                float q = (d[i] == 0.0f) ? 1.0f : (d[i] + d[(i + 2) & 3]) / (d[(i + 2) & 3]);
+
+                //di.uv[i] *= q;
+                uv[i].multiply(q);
+
+                //di.w[i] *= q;
+                w[i] *= q;
+
+                posDi[i].setX(pos[i].getX());
+                posDi[i].setY(pos[i].getY());
+            }
+            //di.mode = nDecalMode;
+            //vLayers[nTargetLayer].vecDecalInstance.push_back(di);
+
+            drawTexturedParallelogram(posDi, uv, w, img, drawTriangles);
+        }
+    }
+
+    private void drawTexturedParallelogram(Vec2df[] pos, Vec2df[] uv, float[] w, Image img, boolean drawTriangles) {
+        drawTexturedTriangle(
+                (int)pos[0].getX(), (int)pos[0].getY(), uv[0].getX(), uv[0].getY(), w[0],
+                (int)pos[1].getX(), (int)pos[1].getY(), uv[1].getX(), uv[1].getY(), w[1],
+                (int)pos[2].getX(), (int)pos[2].getY(), uv[2].getX(), uv[2].getY(), w[2],
+                img);
+        drawTexturedTriangle(
+                (int)pos[0].getX(), (int)pos[0].getY(), uv[0].getX(), uv[0].getY(), w[0],
+                (int)pos[2].getX(), (int)pos[2].getY(), uv[2].getX(), uv[2].getY(), w[2],
+                (int)pos[3].getX(), (int)pos[3].getY(), uv[3].getX(), uv[3].getY(), w[3],
+                img);
+        if (drawTriangles) {
+            drawTriangle(
+                    (int)pos[0].getX(), (int)pos[0].getY(),
+                    (int)pos[1].getX(), (int)pos[1].getY(),
+                    (int)pos[2].getX(), (int)pos[2].getY(),
+                    HexColors.WHITE);
+            drawTriangle(
+                    (int)pos[0].getX(), (int)pos[0].getY(),
+                    (int)pos[2].getX(), (int)pos[2].getY(),
+                    (int)pos[3].getX(), (int)pos[3].getY(),
+                    HexColors.WHITE);
+        }
+    }
+
+    //////////////////////
+    /**
+     * This method sets the correspondent pixel of the triangle to
+     * the pixel from the texture bitmap.
+     * @param y the y value of the pixel
+     * @param x the x value of the pixel
+     * @param tex_u value x fot the texture
+     * @param tex_v value y for the texture
+     * @param tex_w value z for the texture, needed for perspective projection
+     * @param texture the texture, which is a bitmap image
+     */
+    private void setPixelForTexturedTriangle(int y, int x,
+                                             float tex_u, float tex_v, float tex_w,
+                                             Image texture) {
+        int color;// = texture.getSample(tex_u, tex_v);
+        tex_w = (tex_w == 0.0f)? 1.0f : tex_w;
+
+        color = texture.getSample((tex_u / tex_w), (tex_v / tex_w));
+        //color = calculateColor(color, brightness);
+
+        try {
+            /*if ( tex_w > depthBuffer[y * getW() + x] ) {
+                setPixel(x, y, color);
+                depthBuffer[y * getW() + x] = tex_w;
+            }*/
+            setPixel(x, y, color);
+        } catch ( ArrayIndexOutOfBoundsException e ) {
+            String errorMessage = "X: " + x + " Y: " + y + " outside of " + getW() + "x" + getH();
+            System.out.println("Set pixel Error: " + errorMessage + e.getMessage());
+        }
+
+    }
+
+    /**
+     * This method draws a textured triangle. Code copied from Javidx9 video
+     * Code-It-Yourself! 3D Graphics Engine Part #4 - Texturing & depth buffers.
+     * https://www.youtube.com/watch?v=nBzCS-Y0FcY&t=1722s
+     * @param x1 x value for point one of triangle
+     * @param y1 y value for point one of triangle
+     * @param u1 x value for texture point one of triangle
+     * @param v1 y value for texture point one of triangle
+     * @param w1 z value for texture point one of triangle
+     * @param x2 x value for point two of triangle
+     * @param y2 y value for point two of triangle
+     * @param u2 x value for texture point two of triangle
+     * @param v2 y value for texture point two of triangle
+     * @param w2 z value for texture point two of triangle
+     * @param x3 x value for point three of triangle
+     * @param y3 y value for point three of triangle
+     * @param u3 x value for texture point three triangle
+     * @param v3 y value for texture point three triangle
+     * @param w3 z value for texture point three triangle
+     * @param texture the image texture
+     */
+    private void drawTexturedTriangle(
+            int x1, int y1, float u1, float v1, float w1,
+            int x2, int y2, float u2, float v2, float w2,
+            int x3, int y3, float u3, float v3, float w3,
+            Image texture) {
+        if (y2 < y1) {
+            int tempInteger = y1;
+            y1 = y2;
+            y2 = tempInteger;
+
+            tempInteger = x1;
+            x1 = x2;
+            x2 = tempInteger;
+
+            float tempFloat = u1;
+            u1 = u2;
+            u2 = tempFloat;
+
+            tempFloat = v1;
+            v1 = v2;
+            v2 = tempFloat;
+
+            tempFloat = w1;
+            w1 = w2;
+            w2 = tempFloat;
+        }
+
+        if (y3 < y1) {
+            int tempInteger = y1;
+            y1 = y3;
+            y3 = tempInteger;
+
+            tempInteger = x1;
+            x1 = x3;
+            x3 = tempInteger;
+
+            float tempFloat = u1;
+            u1 = u3;
+            u3 = tempFloat;
+
+            tempFloat = v1;
+            v1 = v3;
+            v3 = tempFloat;
+
+            tempFloat = w1;
+            w1 = w3;
+            w3 = tempFloat;
+        }
+
+        if (y3 < y2) {
+            int tempInteger = y2;
+            y2 = y3;
+            y3 = tempInteger;
+
+            tempInteger = x2;
+            x2 = x3;
+            x3 = tempInteger;
+
+            float tempFloat = u2;
+            u2 = u3;
+            u3 = tempFloat;
+
+            tempFloat = v2;
+            v2 = v3;
+            v3 = tempFloat;
+
+            tempFloat = w2;
+            w2 = w3;
+            w3 = tempFloat;
+        }
+
+        int dy1 = y2 - y1;
+        int dx1 = x2 - x1;
+        float dv1 = v2 - v1;
+        float du1 = u2 - u1;
+        float dw1 = w2 - w1;
+
+        int dy2 = y3 - y1;
+        int dx2 = x3 - x1;
+        float dv2 = v3 - v1;
+        float du2 = u3 - u1;
+        float dw2 = w3 - w1;
+
+        float tex_u, tex_v, tex_w;
+
+        float dax_step = 0, dbx_step = 0, du1_step = 0, dv1_step = 0, du2_step = 0, dv2_step = 0, dw1_step = 0, dw2_step = 0;
+
+        if ( dy1 != 0 ) {
+            dax_step = dx1 / (float)Math.abs(dy1);
+        }
+        if ( dy2 != 0 ) {
+            dbx_step = dx2 / (float)Math.abs(dy2);
+        }
+
+        if ( dy1 != 0 ) {
+            du1_step = du1 / (float)Math.abs(dy1);
+        }
+        if ( dy1 != 0 ) {
+            dv1_step = dv1 / (float)Math.abs(dy1);
+        }
+        if ( dy1 != 0 ) {
+            dw1_step = dw1 / (float)Math.abs(dy1);
+        }
+
+        if ( dy2 != 0 ) {
+            du2_step = du2 / (float)Math.abs(dy2);
+        }
+        if ( dy2 != 0 ) {
+            dv2_step = dv2 / (float)Math.abs(dy2);
+        }
+        if ( dy2 != 0 ) {
+            dw2_step = dw2 / (float)Math.abs(dy2);
+        }
+
+        if ( dy1 != 0 ) {
+            for ( int i = y1; i <= y2; i++ ) {
+                int ax = (int)(x1 + (float)(i - y1) * dax_step);
+                int bx = (int)(x1 + (float)(i - y1) * dbx_step);
+
+                float tex_su = u1 + (float)(i - y1) * du1_step;
+                float tex_sv = v1 + (float)(i - y1) * dv1_step;
+                float tex_sw = w1 + (float)(i - y1) * dw1_step;
+
+                float tex_eu = u1 + (float)(i - y1) * du2_step;
+                float tex_ev = v1 + (float)(i - y1) * dv2_step;
+                float tex_ew = w1 + (float)(i - y1) * dw2_step;
+
+                if ( ax > bx ) {
+                    int tempInteger = ax;
+                    ax = bx;
+                    bx = tempInteger;
+
+                    float tempFloat = tex_su;
+                    tex_su = tex_eu;
+                    tex_eu = tempFloat;
+
+                    tempFloat = tex_sv;
+                    tex_sv = tex_ev;
+                    tex_ev = tempFloat;
+
+                    tempFloat = tex_sw;
+                    tex_sw = tex_ew;
+                    tex_ew = tempFloat;
+                }
+
+                tex_u = tex_su;
+                tex_v = tex_sv;
+                tex_w = tex_sw;
+
+                float tstep = 1.0f / ((float)(bx - ax));
+                float t = 0.0f;
+
+                for (int j = ax; j < bx; j++) {
+                    tex_u = (1.0f - t) * tex_su + t * tex_eu;
+                    tex_v = (1.0f - t) * tex_sv + t * tex_ev;
+                    tex_w = (1.0f - t) * tex_sw + t * tex_ew;
+
+                    setPixelForTexturedTriangle(i, j, tex_u, tex_v, tex_w, texture);
+
+                    t += tstep;
+                }
+            }
+        }
+
+        dy1 = y3 - y2;
+        dx1 = x3 - x2;
+        dv1 = v3 - v2;
+        du1 = u3 - u2;
+        dw1 = w3 - w2;
+
+        if ( dy1 != 0 ) {
+            dax_step = dx1 / (float)Math.abs(dy1);
+        }
+        if ( dy2 != 0 ) {
+            dbx_step = dx2 / (float)Math.abs(dy2);
+        }
+
+        du1_step = 0;
+        dv1_step = 0;
+        if ( dy1 != 0 ) {
+            du1_step = du1 / (float)Math.abs(dy1);
+        }
+        if ( dy1 != 0 ) {
+            dv1_step = dv1 / (float)Math.abs(dy1);
+        }
+        if ( dy1 != 0 ) {
+            dw1_step = dw1 / (float)Math.abs(dy1);
+        }
+
+        if ( dy1 != 0 ) {
+            for (int i = y2; i <= y3; i++) {
+                int ax = (int)(x2 + (float)(i - y2) * dax_step);
+                int bx = (int)(x1 + (float)(i - y1) * dbx_step);
+
+                float tex_su = u2 + (float)(i - y2) * du1_step;
+                float tex_sv = v2 + (float)(i - y2) * dv1_step;
+                float tex_sw = w2 + (float)(i - y2) * dw1_step;
+
+                float tex_eu = u1 + (float)(i - y1) * du2_step;
+                float tex_ev = v1 + (float)(i - y1) * dv2_step;
+                float tex_ew = w1 + (float)(i - y1) * dw2_step;
+
+                if (ax > bx) {
+                    int tempInteger = ax;
+                    ax = bx;
+                    bx = tempInteger;
+
+                    float tempFloat = tex_su;
+                    tex_su = tex_eu;
+                    tex_eu = tempFloat;
+
+                    tempFloat = tex_sv;
+                    tex_sv = tex_ev;
+                    tex_ev = tempFloat;
+
+                    tempFloat = tex_sw;
+                    tex_sw = tex_ew;
+                    tex_ew = tempFloat;
+                }
+
+                tex_u = tex_su;
+                tex_v = tex_sv;
+                tex_w = tex_sw;
+
+                float tstep = 1.0f / ((float)(bx - ax));
+                float t = 0.0f;
+
+                for (int j = ax; j < bx; j++) {
+                    tex_u = (1.0f - t) * tex_su + t * tex_eu;
+                    tex_v = (1.0f - t) * tex_sv + t * tex_ev;
+                    tex_w = (1.0f - t) * tex_sw + t * tex_ew;
+
+                    setPixelForTexturedTriangle(i, j, tex_u, tex_v, tex_w, texture);
+
+                    t += tstep;
+                }
+            }
+        }
+    }
+    //////////////////////
 
     // Getters
 

@@ -1,9 +1,9 @@
 package olcPGEApproach;
 
-import javafx.beans.property.SimpleIntegerProperty;
 import javafx.scene.Node;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 
 import java.util.HashMap;
 
@@ -20,12 +20,6 @@ public class Input {
     private final HashMap<KeyCode, Boolean> mapKeysState;
 
     private final HashMap<KeyCode, Boolean> mapKeysStateLast;
-
-
-    private final HashMap<KeyCode, Boolean> mapKeysPress;
-
-    private final HashMap<KeyCode, SimpleIntegerProperty> mapKeysCount;
-
 
     private final HashMap<MouseButton, Boolean> mapButtons;
 
@@ -62,16 +56,6 @@ public class Input {
             mapButtonLast.put(btn, Boolean.FALSE);
         }
 
-        mapKeysPress = new HashMap<>();
-        for ( KeyCode keyCode : KeyCode.values() ) {
-            mapKeysPress.put(keyCode, Boolean.FALSE);
-        }
-
-        mapKeysCount = new HashMap<>();
-        for ( KeyCode keyCode : KeyCode.values() ) {
-            mapKeysCount.put(keyCode, new SimpleIntegerProperty(0));
-        }
-
         setNodeClickEvents();
         setNodeKeyEvents();
         node.setOnScroll(event -> scroll += (int) event.getDeltaY() / 40);
@@ -79,29 +63,15 @@ public class Input {
 
     private void setNodeKeyEvents() {
         node.setOnKeyPressed(event -> {
-            System.out.println("Key pressed: " + event.getCode());
             mapKeysState.replace(event.getCode(), Boolean.TRUE);
-            mapKeysPress.replace(event.getCode(), Boolean.TRUE);
-
-            mapKeysCount.get(event.getCode()).set(mapKeysCount.get(event.getCode()).get() + 1);
         });
         node.setOnKeyReleased(event -> {
-            System.out.println("Key released: " + event.getCode());
             mapKeysState.replace(event.getCode(), Boolean.FALSE);
-            mapKeysPress.replace(event.getCode(), Boolean.FALSE);
-
-            mapKeysCount.get(event.getCode()).set(0);
         });
-
-        /*node.setOnKeyPressed(keyEvent ->
-                mapKeysCount.get(keyEvent.getCode()).set(mapKeysCount.get(keyEvent.getCode()).get() + 1));
-
-        node.setOnKeyReleased(keyEvent ->
-                mapKeysCount.get(keyEvent.getCode()).set(0));*/
     }
 
     private void setNodeClickEvents() {
-        node.setOnMousePressed(event -> {
+        /*node.setOnMousePressed(event -> {
             mapButtons.replace(event.getButton(), Boolean.TRUE);
         });
         node.setOnMouseReleased(event -> {
@@ -110,11 +80,17 @@ public class Input {
         node.setOnMouseMoved(event -> {
             mouseX = event.getX();
             mouseY = event.getY();
-        });
-    }
-
-    public boolean isKeyDown2(KeyCode keyCode) {
-        return mapKeysPress.get(keyCode);
+        });*/
+        node.addEventHandler(MouseEvent.ANY, (event -> {
+            if (event.getEventType() == MouseEvent.MOUSE_PRESSED) {
+                mapButtons.replace(event.getButton(), Boolean.TRUE);
+            }
+            if (event.getEventType() == MouseEvent.MOUSE_RELEASED) {
+                mapButtons.replace(event.getButton(), Boolean.FALSE);
+            }
+            mouseX = event.getX();
+            mouseY = event.getY();
+        }));
     }
 
     public void update() {
@@ -133,6 +109,8 @@ public class Input {
         return mapKeysStateLast.get(keyCode);
     }
 
+    // Now works well!!
+
     public boolean isKeyUp(KeyCode keyCode) {
         boolean isPressed = mapKeysState.get(keyCode);
         boolean wasPressed = mapKeysStateLast.get(keyCode);
@@ -140,10 +118,9 @@ public class Input {
     }
 
     public boolean isKeyDown(KeyCode keyCode) {
-        /*boolean isPressed = mapKeysState.get(keyCode);
+        boolean isPressed = mapKeysState.get(keyCode);
         boolean wasPressed = mapKeysStateLast.get(keyCode);
-        return isPressed && !wasPressed;*/
-        return mapKeysCount.get(keyCode).isEqualTo(1).get();
+        return isPressed && !wasPressed;
     }
 
     public boolean isKeyHeld(KeyCode keyCode) {
@@ -154,6 +131,10 @@ public class Input {
 
     public boolean isButton(MouseButton button) {
         return mapButtons.get(button);
+    }
+
+    public boolean isButtonLast(MouseButton button) {
+        return mapButtonLast.get(button);
     }
 
     public boolean isButtonUp(MouseButton button) {
