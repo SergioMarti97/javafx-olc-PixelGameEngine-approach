@@ -35,6 +35,8 @@ public class CustomTimer extends AnimationTimer {
 
     protected int frames = 0;
 
+    protected boolean showFPSOnConsole = true;
+
     @Override
     public void handle(long now) {
         if ( lastTime > 0 ) {
@@ -49,7 +51,9 @@ public class CustomTimer extends AnimationTimer {
         if ( accumulatedTime >= 1000000000L ) {
             accumulatedTime -= 1000000000L;
             textFps.set(String.format("FPS: %d", frames));
-            //System.out.println("FPS: " + frames);
+            if (showFPSOnConsole) {
+                System.out.println("FPS: " + frames);
+            }
             frames = 0;
         }
         renderer.render();
@@ -60,12 +64,20 @@ public class CustomTimer extends AnimationTimer {
         return textFps;
     }
 
+    public boolean isShowFPSOnConsole() {
+        return showFPSOnConsole;
+    }
+
     public void setUpdater(Update updater) {
         this.updater = updater;
     }
 
     public void setRenderer(Render renderer) {
         this.renderer = renderer;
+    }
+
+    public void setShowFPSOnConsole(boolean showFPSOnConsole) {
+        this.showFPSOnConsole = showFPSOnConsole;
     }
 
 }
