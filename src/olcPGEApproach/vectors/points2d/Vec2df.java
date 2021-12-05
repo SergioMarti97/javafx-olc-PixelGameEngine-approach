@@ -165,6 +165,26 @@ public class Vec2df implements Vec2d {
         return (x * x) + (y * y);
     }
 
+    public float dist(float x, float y) {
+        return (float)Math.sqrt(dist2(x, y));
+    }
+
+    public float dist2(float x, float y) {
+        float a = this.x - x;
+        float b = this.y - y;
+        return (a * a) + (b * b);
+    }
+
+    public float dist(Vec2df pos) {
+        return (float)Math.sqrt(dist2(pos));
+    }
+
+    public float dist2(Vec2df pos) {
+        float a = this.x - pos.getX();
+        float b = this.y - pos.getY();
+        return (a * a) + (b * b);
+    }
+
     @Override
     public void set(Vec2d vec2d) {
         if ( vec2d instanceof Vec2df) {

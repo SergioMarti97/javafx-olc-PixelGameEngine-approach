@@ -1241,12 +1241,20 @@ public class Renderer {
         return ambientColor;
     }
 
+    public Font getFont() {
+        return font;
+    }
+
     private void setZDepth(int zDepth) {
         this.zDepth = zDepth;
     }
 
     public void setAmbientColor(int ambientColor) {
         this.ambientColor = ambientColor;
+    }
+
+    public void setFont(Font font) {
+        this.font = font;
     }
 
 }

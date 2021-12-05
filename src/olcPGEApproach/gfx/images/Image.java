@@ -167,6 +167,14 @@ public class Image {
         this.p = p;
     }
 
+    public void set(int x, int y, int pixel) {
+        p[x + w * y] = pixel;
+    }
+
+    public int get(int x, int y) {
+        return p[x + w * y];
+    }
+
     public void setAlpha(boolean alpha) {
         this.alpha = alpha;
     }

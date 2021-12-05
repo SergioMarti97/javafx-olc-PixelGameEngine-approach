@@ -165,6 +165,26 @@ public class Vec2dd implements Vec2d {
         return (x * x) + (y * y);
     }
 
+    public double dist(double x, double y) {
+        return Math.sqrt(dist2(x, y));
+    }
+
+    public double dist2(double x, double y) {
+        double a = this.x - x;
+        double b = this.y - y;
+        return (a * a) + (b * b);
+    }
+
+    public double dist(Vec2dd pos) {
+        return Math.sqrt(dist2(pos));
+    }
+
+    public double dist2(Vec2dd pos) {
+        double a = this.x - pos.getX();
+        double b = this.y - pos.getY();
+        return (a * a) + (b * b);
+    }
+
     @Override
     public void set(Vec2d vec2d) {
         if ( vec2d instanceof Vec2dd) {

@@ -165,6 +165,26 @@ public class Vec2di implements Vec2d {
         return (x * x) + (y * y);
     }
 
+    public int dist(int x, int y) {
+        return (int)Math.sqrt(dist2(x, y));
+    }
+
+    public int dist2(int x, int y) {
+        int a = this.x - x;
+        int b = this.y - y;
+        return (a * a) + (b * b);
+    }
+
+    public int dist(Vec2di pos) {
+        return (int)Math.sqrt(dist2(pos));
+    }
+
+    public int dist2(Vec2di pos) {
+        int a = this.x - pos.getX();
+        int b = this.y - pos.getY();
+        return (a * a) + (b * b);
+    }
+
     @Override
     public void set(Vec2d vec2d) {
         if ( vec2d instanceof Vec2di) {
