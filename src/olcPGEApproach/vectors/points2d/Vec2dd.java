@@ -39,6 +39,15 @@ public class Vec2dd implements Vec2d {
     }
 
     /**
+     * Constructor with same value for x and y
+     * @param v value for x and y
+     */
+    public Vec2dd(double v) {
+        this.x = v;
+        this.y = v;
+    }
+
+    /**
      * Copy constructor
      * @param vec2dd the instance of the same object to copy the values
      */
@@ -132,6 +141,16 @@ public class Vec2dd implements Vec2d {
      * @param y the new value for the y component
      */
     public void setY(double y) {
+        this.y = y;
+    }
+
+    /**
+     * Setter for the two components
+     * @param x new value for x
+     * @param y new value for y
+     */
+    public void set(double x, double y) {
+        this.x = x;
         this.y = y;
     }
 
