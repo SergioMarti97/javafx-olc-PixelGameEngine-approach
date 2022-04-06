@@ -491,6 +491,7 @@ public class TestTriangles implements AbstractGame {
                 // Accept whole block when totally covered
                 if (a == 0xF && b == 0xF && c == 0xF) {
                     for (int iy = y; iy < (y + q); iy++) {
+                        //Arrays.fill(r.getP(), x, x + q, 0xFF007F00);
                         for (int ix = x; ix < (x + q); ix++) {
                             r.setPixel(ix, iy, 0xFF007F00); // 0xFF007F00
                         }
@@ -521,7 +522,7 @@ public class TestTriangles implements AbstractGame {
             }
         }
 
-        r.drawRectangle(minX, minY, (maxX - minX), (maxY - minY), HexColors.WINE);
+        //r.drawRectangle(minX, minY, (maxX - minX), (maxY - minY), HexColors.WINE);
     }
 
     private double acc1 = 0;

@@ -150,6 +150,28 @@ public class Renderer {
     }
 
     /**
+     * This method interpolates color between to of them
+     * @see "https://stackoverflow.com/questions/17544157/generate-n-colors-between-two-colors"
+     */
+    public static int interpolateColor(int x, int y, double blending) {
+        double inverseBlending = 1 - blending;
+
+        int xR = x >> 16 & 255;
+        int xG = x >> 8 & 255;
+        int xB = x & 255;
+
+        int yR = y >> 16 & 255;
+        int yG = y >> 8 & 255;
+        int yB = y & 255;
+
+        double r = xR * blending + yR * inverseBlending;
+        double g = xG * blending + yG * inverseBlending;
+        double b = xB * blending + yB * inverseBlending;
+
+        return 255 << 24 | (int)r << 16 | (int)g << 8 | (int)b;
+    }
+
+    /**
      * This method clears all the screen with
      * the color passed as parameter
      *
