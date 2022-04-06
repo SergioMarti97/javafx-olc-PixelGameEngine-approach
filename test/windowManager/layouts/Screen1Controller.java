@@ -2,7 +2,7 @@ package windowManager.layouts;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-import olcPGEApproach.windowManager.ScreenController;
+import olcPGEApproach.utils.windowManager.ScreenController;
 import windowManager.ScreenFramework;
 
 import java.net.URL;

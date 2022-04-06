@@ -1,4 +1,4 @@
-package olcPGEApproach.windowManager;
+package olcPGEApproach.utils.windowManager;
 
 import javafx.fxml.Initializable;
 

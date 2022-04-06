@@ -1,4 +1,4 @@
-package olcPGEApproach.windowManager;
+package olcPGEApproach.utils.windowManager;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;

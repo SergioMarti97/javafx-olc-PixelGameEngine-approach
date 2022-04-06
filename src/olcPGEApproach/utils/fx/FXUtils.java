@@ -1,4 +1,4 @@
-package olcPGEApproach.fxutils;
+package olcPGEApproach.utils.fx;
 
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;

@@ -4,7 +4,7 @@ import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import olcPGEApproach.windowManager.ScreensManager;
+import olcPGEApproach.utils.windowManager.ScreensManager;
 
 public class ScreenFramework extends Application {
 

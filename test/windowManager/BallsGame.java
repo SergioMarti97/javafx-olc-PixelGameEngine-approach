@@ -3,7 +3,7 @@ package windowManager;
 import olcPGEApproach.AbstractGame;
 import olcPGEApproach.GameContainer;
 import olcPGEApproach.demos.BouncingBalls;
-import olcPGEApproach.windowManager.ScreenController;
+import olcPGEApproach.utils.windowManager.ScreenController;
 
 /**
  * This game is a simple game of balls what bounces on

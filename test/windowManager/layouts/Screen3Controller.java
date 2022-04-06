@@ -4,7 +4,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.image.ImageView;
 import olcPGEApproach.GameContainer;
-import olcPGEApproach.windowManager.ScreenController;
+import olcPGEApproach.utils.windowManager.ScreenController;
 import windowManager.BallsGame;
 import windowManager.ScreenFramework;
 
