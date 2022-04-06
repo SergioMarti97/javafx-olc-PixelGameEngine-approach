@@ -50,6 +50,16 @@ public class Vec3di implements Vec3d {
     }
 
     /**
+     * Constructor with same value for the three components
+     * @param v same value for the three components
+     */
+    public Vec3di(int v) {
+        this.x = v;
+        this.y = v;
+        this.z = v;
+    }
+
+    /**
      * Constructor passed by parameter
      * @param vec3di the object which we need to copy
      */
@@ -196,6 +206,18 @@ public class Vec3di implements Vec3d {
 
     public void setZ(int z) {
         this.z = z;
+    }
+
+    public void set(int x, int y, int z) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+    }
+
+    public void set(int v) {
+        this.x = v;
+        this.y = v;
+        this.z = v;
     }
 
 
