@@ -23,11 +23,36 @@ public class BouncingBalls {
      */
     private Vec2di screenSize;
 
+    private final Random rnd;
+
+    private final int maxR;
+
+    private final int minR;
+
+    private final int width;
+
+    private final int height;
+
+    private final int maxVel;
+
     /**
      * Useful method to build a random color
      */
     private int makeRndColor(Random rnd) {
         return 0xff << 24 | rnd.nextInt(255) << 16 | rnd.nextInt(255) << 8 | rnd.nextInt(255);
+    }
+
+    public BouncingBall rndBall() {
+        float r = rnd.nextInt(maxR - minR) + minR;
+        return new BouncingBall(
+                new Vec2df(
+                        rnd.nextInt((int) (width - 2 * r)) + r,
+                        rnd.nextInt((int) (height - 2 * r)) + r),
+                new Vec2df(
+                        rnd.nextInt(maxVel) - (maxVel / 2f),
+                        rnd.nextInt(maxVel) - (maxVel / 2f)),
+                r,
+                makeRndColor(rnd));
     }
 
     /**
@@ -40,19 +65,15 @@ public class BouncingBalls {
      * @param height the height of the rectangle where the balls bounce
      */
     public BouncingBalls(int maxVel, int maxR, int minR, int numBalls, int width, int height) {
-        Random rnd = new Random();
+        rnd = new Random();
         balls = new ArrayList<>();
+        this.maxVel = maxVel;
+        this.maxR = maxR;
+        this.minR = minR;
+        this.width = width;
+        this.height = height;
         for (int i = 0; i < numBalls; i++) {
-            float r = rnd.nextInt(maxR - minR) + minR;
-            balls.add(new BouncingBall(
-                    new Vec2df(
-                            rnd.nextInt((int) (width - 2 * r)) + r,
-                            rnd.nextInt((int) (height - 2 * r)) + r),
-                    new Vec2df(
-                            rnd.nextInt(maxVel) - (maxVel / 2f),
-                            rnd.nextInt(maxVel) - (maxVel / 2f)),
-                    r,
-                    makeRndColor(rnd)));
+            balls.add(rndBall());
         }
         screenSize = new Vec2di(width, height);
     }
