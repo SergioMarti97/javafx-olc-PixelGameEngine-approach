@@ -5,62 +5,27 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelFormat;
-import javafx.scene.input.MouseButton;
-import javafx.scene.paint.Color;
 import javafx.scene.transform.Rotate;
-import olcPGEApproach.AbstractGame;
+import olcPGEApproach.AbstractGamePanAndZoom;
 import olcPGEApproach.GameContainer;
-import olcPGEApproach.demos.BouncingBall;
-import olcPGEApproach.demos.BouncingBalls;
 
-import java.util.Random;
-
-public class TestCanvasGame implements AbstractGame {
-
-    private BouncingBalls balls;
+public class TestCanvasGameImages extends AbstractGamePanAndZoom {
 
     private Canvas canvas;
-
-    private Image[] icons;
-
-    private Random rnd;
 
     private double angle = 0.0;
 
     @Override
-    public void initialize(GameContainer gc) {
-        rnd = new Random();
-        balls = new BouncingBalls(1000, 20, 5, 0, 1280, 720);
-        icons = new Image[] {
-                new Image("/icons/icon_1.png"),
-                new Image("/icons/icon_2.png"),
-                new Image("/icons/icon_3.png"),
-                new Image("/icons/icon_4.png"),
-                new Image("/icons/icon_5.png"),
-        };
-    }
-
-    @Override
     public void update(GameContainer gc, float elapsedTime) {
-        balls.update(elapsedTime);
-
-        if (gc.getInput().isButtonHeld(MouseButton.PRIMARY)) {
-            BouncingBall ball = balls.rndBall();
-            ball.setImg(icons[rnd.nextInt(4)]);
-            ball.getPos().set((float)gc.getInput().getMouseX(), (float)gc.getInput().getMouseY());
-            balls.getBalls().add(ball);
-        }
-
+        super.update(gc, elapsedTime);
         angle += 1;
     }
 
     @Override
     public void render(GameContainer gc) {
-        //gc.getRenderer().clear(0xFFADD8E6);
-        //balls.render(gc.getRenderer());
-
-        drawBalls();
-        //drawImage(gc);
+        super.render(gc);
+        gc.getRenderer().clear(0xFFADD8E6);
+        drawImage(gc);
     }
 
     private void drawCustom() {
@@ -88,7 +53,7 @@ public class TestCanvasGame implements AbstractGame {
 
     private void drawImage(GameContainer gc) {
         canvas.getGraphicsContext2D().getPixelWriter().setPixels(0, 0,
-                1280, 360,
+                1280, 720,
                 PixelFormat.getIntArgbInstance(),
                 gc.getRenderer().getP(),
                 0, 1280);
@@ -125,37 +90,6 @@ public class TestCanvasGame implements AbstractGame {
         gc.restore(); // back to original state (before rotation)
     }
 
-    private void drawBalls() {
-        canvas.getGraphicsContext2D().setFill(Color.rgb(0xAD, 0xD8, 0xE6));
-        canvas.getGraphicsContext2D().fillRect(0, 0, canvas.getWidth(), canvas.getHeight());
-        for (BouncingBall ball : balls.getBalls()) {
-            drawRotatedImage(canvas.getGraphicsContext2D(),
-                    ball.getImg(),
-                    angle,
-                    ball.getPos().getX(),// - ball.getR(),
-                    ball.getPos().getY(),// - ball.getR(),
-                    ball.getR() * 2,
-                    ball.getR() * 2);
-            /*canvas.getGraphicsContext2D().drawImage(
-                    ball.getImg(),
-                    ball.getPos().getX() - ball.getR(),
-                    ball.getPos().getY() - ball.getR(),
-                    ball.getR() * 2,
-                    ball.getR() * 2);*/
-
-            /*CustomColor c = new CustomColor(ball.getCol());
-            canvas.getGraphicsContext2D().setFill(Color.rgb(c.getR(), c.getG(), c.getB(), 0.5f));
-            canvas.getGraphicsContext2D().fillOval(
-                    ball.getPos().getX() - ball.getR(),
-                    ball.getPos().getY() - ball.getR(),
-                    ball.getR() * 2,
-                    ball.getR() * 2
-            );*/
-        }
-        canvas.getGraphicsContext2D().setFill(Color.BLACK);
-        canvas.getGraphicsContext2D().fillText("Num balls: " + balls.getBalls().size(), 10, 10);
-    }
-
     public Image scale(Image source, int targetWidth, int targetHeight, boolean preserveRatio) {
         ImageView imageView = new ImageView(source);
         imageView.setPreserveRatio(preserveRatio);
@@ -164,7 +98,6 @@ public class TestCanvasGame implements AbstractGame {
         return imageView.snapshot(null, null);
     }
 
-
     public Canvas getCanvas() {
         return canvas;
     }
@@ -172,5 +105,4 @@ public class TestCanvasGame implements AbstractGame {
     public void setCanvas(Canvas canvas) {
         this.canvas = canvas;
     }
-
 }

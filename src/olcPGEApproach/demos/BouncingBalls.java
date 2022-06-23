@@ -81,9 +81,58 @@ public class BouncingBalls {
     /**
      * This method updates all the balls
      */
-    public void update(float elapsedTime) {
+    public void update(float dt) {
         for (BouncingBall b : balls) {
-            b.update(elapsedTime, screenSize.getX(), screenSize.getY());
+            /*if ( (b.getPos().getX() + b.getVel().getX() * dt) < b.getR() ) {
+                // left edge
+                b.getPos().addToY(b.getVel().getY() * dt);
+                float x = (b.getPos().getX() + b.getR()) + b.getVel().getX() * dt;
+                b.getPos().setX(x - b.getR());
+                b.getVel().setX(-b.getVel().getX());
+            } else if ( (b.getPos().getX() + b.getVel().getX() * dt) + b.getR() > width ) {
+                // right edge
+                b.getPos().addToY(b.getVel().getY() * dt);
+                float x = (b.getPos().getX() + b.getR()) + b.getVel().getX() * dt;
+                b.getPos().setX(2 * width - x - b.getR());
+                b.getVel().setX(-b.getVel().getX());
+            } else if ( (b.getPos().getY() + b.getVel().getY() * dt) < b.getR() ) {
+                // top edge
+                b.getPos().addToX(b.getVel().getX() * dt);
+                float y = (b.getPos().getY() + b.getR()) + b.getVel().getY() * dt;
+                b.getPos().setY(y - b.getR());
+                b.getVel().setY(-b.getVel().getY());
+            } else if ((b.getPos().getY() + b.getVel().getY() * dt) + b.getR() > height) {
+                // bottom edge
+                b.getPos().addToX(b.getVel().getX() * dt);
+                float y = (b.getPos().getY() + b.getR()) + b.getVel().getY() * dt;
+                b.getPos().setY(2 * height - y - b.getR());
+                b.getVel().setY(-b.getVel().getY());
+            } else {
+                // normal case
+                b.getPos().addToX(b.getVel().getX() * dt);
+                b.getPos().addToY(b.getVel().getY() * dt);
+            }*/
+
+            // old code
+            b.getPos().addToX(b.getVel().getX() * dt);
+            b.getPos().addToY(b.getVel().getY() * dt);
+
+            if (b.getPos().getX() - b.getR() < 0) {
+                b.getPos().setX(b.getR());
+                b.getVel().setX(-b.getVel().getX());
+            }
+            if (b.getPos().getX() + b.getR() > width) {
+                b.getPos().setX(width - b.getR());
+                b.getVel().setX(-b.getVel().getX());
+            }
+            if (b.getPos().getY() - b.getR() < 0 ) {
+                b.getPos().setY(b.getR());
+                b.getVel().setY(-b.getVel().getY());
+            }
+            if (b.getPos().getY() + b.getR() > height) {
+                b.getPos().setY(height - b.getR());
+                b.getVel().setY(-b.getVel().getY());
+            }
         }
     }
 
@@ -109,4 +158,21 @@ public class BouncingBalls {
     public void setScreenSize(Vec2di screenSize) {
         this.screenSize = screenSize;
     }
+
+    public int getNumBalls() {
+        return balls.size();
+    }
+
+    public void add(BouncingBall b) {
+        balls.add(b);
+    }
+
+    public boolean remove(BouncingBall b) {
+        return balls.remove(b);
+    }
+
+    public BouncingBall remove(int idx) {
+        return balls.remove(idx);
+    }
+
 }

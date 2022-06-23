@@ -1,6 +1,5 @@
 package olcPGEApproach.demos;
 
-import javafx.scene.image.Image;
 import olcPGEApproach.gfx.Renderer;
 import olcPGEApproach.vectors.points2d.Vec2df;
 
@@ -10,6 +9,8 @@ import olcPGEApproach.vectors.points2d.Vec2df;
  * demos of the engine
  */
 public class BouncingBall {
+
+    private int id = 0;
 
     /**
      * Position of the ball
@@ -30,8 +31,6 @@ public class BouncingBall {
      * Color of the ball
      */
     private int col;
-
-    private Image img;
 
     /**
      * Constructor
@@ -109,11 +108,11 @@ public class BouncingBall {
         this.col = col;
     }
 
-    public Image getImg() {
-        return img;
+    public int getId() {
+        return id;
     }
 
-    public void setImg(Image img) {
-        this.img = img;
+    public void setId(int id) {
+        this.id = id;
     }
 }

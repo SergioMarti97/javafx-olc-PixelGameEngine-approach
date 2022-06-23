@@ -13,7 +13,7 @@ public class TestCanvasController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        TestCanvasGame game = new TestCanvasGame();
+        TestCanvasGameBalls game = new TestCanvasGameBalls();
         GameContainer gc = new GameContainer(game,
                 (int)canvas.getWidth(),
                 (int)canvas.getHeight(),
